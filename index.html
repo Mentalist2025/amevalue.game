@@ -98,6 +98,8 @@
     let buttonPulse = 0;
     let hurryMessage = false;
     let gameOverDelay = 0;
+    const BASE_PRICE = 1650; // Змінено базову ціну на 1650 євро/місяць
+    let discountPulse = 0; // Для анімації тексту "Discount"
 
     function setup() {
       let canvasWidth = min(windowWidth * 0.8, 350);
@@ -147,8 +149,16 @@
           text("Hurry up!", width / 2, 170);
         }
 
+        // Анімація тексту "Discount"
+        discountPulse += 0.05;
+        let discountTextScale = 1 + sin(discountPulse) * 0.05;
+        push();
+        translate(width / 2, 200);
+        scale(discountTextScale);
         fill(0);
-        text("Discount: " + discount.toFixed(1) + "%", width / 2, 200);
+        textSize(clamp(12, width / 20, 16));
+        text("Discount: " + discount.toFixed(1) + "%", 0, 0);
+        pop();
 
         fill('#005f99');
         targetBarWidth = map(max(0, tickets), 0, 500, 0, width - 50);
@@ -174,11 +184,16 @@
         text("Game Over!", width / 2, 50);
         fill(0);
         textSize(clamp(12, width / 20, 16));
-        text("Tickets left: " + floor(tickets) + (tickets > 50 ? "! Too many – let’s fix it!" : "! Nice – let’s improve!"), width / 2, 90);
+        text("Tickets left: " + floor(tickets) + (tickets > 50 ? "! Too many – let's fix it!" : "! Nice – let's improve!"), width / 2, 90);
         text("You earned a " + discount.toFixed(1) + "% discount!", width / 2, 130);
-        text("Amevalue saves time & money – let’s shine!", width / 2, 170);
-        text("Book a chat to claim your discount!", width / 2, 210);
+        let newPrice = BASE_PRICE * (1 - discount / 100);
+        let monthlySavings = BASE_PRICE - newPrice;
+        let yearlySavings = monthlySavings * 12;
+        text("Savings per agent: " + monthlySavings.toFixed(0) + "€/month", width / 2, 160);
+        text(yearlySavings.toFixed(0) + "€/year!", width / 2, 180);
+        text("Amevalue saves time & money", width / 2, 210);
         drawPlayAgainButton();
+        drawBookButton();
       }
     }
 
@@ -216,6 +231,17 @@
       fill(255);
       textSize(clamp(12, width / 20, 16));
       text("Play Again", 0, 0);
+      pop();
+    }
+
+    function drawBookButton() {
+      push();
+      translate(width / 2, height - 100);
+      fill('#005f99');
+      rect(0, 0, 220, 30, 5);
+      fill(255);
+      textSize(clamp(12, width / 20, 16));
+      text("Claim Discount", 0, 0);
       pop();
     }
 
@@ -271,6 +297,7 @@
           targetBarWidth = 0;
           hurryMessage = false;
           particles = [];
+          discountPulse = 0;
         } else {
           tickets = max(0, tickets - random(2, 5));
           let chance = random(0, 1);
@@ -281,6 +308,15 @@
           for (let i = 0; i < 5; i++) {
             addParticle(buttonX + random(-20, 20), buttonY + random(-20, 0));
           }
+        }
+      }
+
+      if (gameOver) {
+        let bookButtonX = width / 2;
+        let bookButtonY = height - 100;
+        let bookButtonD = dist(mouseX, mouseY, bookButtonX, bookButtonY);
+        if (bookButtonD < 110) {
+          window.location.href = 'https://calendly.com/ame-value/intro-call';
         }
       }
     }
@@ -297,6 +333,5 @@
     }
   </script>
   <button class="button" onclick="window.location.href='https://ame-value.com'">Learn more about Amevalue</button>
-  <button class="button" onclick="window.location.href='https://calendly.com/your-link'">Book a Meeting to Claim Discount</button>
 </body>
 </html>
